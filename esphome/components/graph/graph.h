@@ -133,8 +133,8 @@ class GraphTrace {
 
 class Graph : public Component {
  public:
-  void draw(display::DisplayBuffer *buff, uint16_t x_offset, uint16_t y_offset, Color color);
-  void draw_legend(display::DisplayBuffer *buff, uint16_t x_offset, uint16_t y_offset, Color color);
+  void draw(display::Display *buff, uint16_t x_offset, uint16_t y_offset, Color color);
+  void draw_legend(display::Display *buff, uint16_t x_offset, uint16_t y_offset, Color color);
 
   void setup() override;
   float get_setup_priority() const override { return setup_priority::PROCESSOR; }
