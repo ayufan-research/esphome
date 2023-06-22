@@ -12,7 +12,7 @@ namespace image {
 
 static const char *TAG = "image";
 
-void Image::draw(int x, int y, display::DisplayBuffer *display, Color color_on, Color color_off) {
+void Image::draw(int x, int y, display::Display *display, Color color_on, Color color_off) {
   switch (type_) {
     case IMAGE_TYPE_BINARY: {
       for (int img_x = 0; img_x < width_; img_x++) {
@@ -139,7 +139,7 @@ Color Image::get_grayscale_pixel_(int x, int y) const {
 #ifdef USE_JPEGDEC
 static int jpeg_draw(JPEGDRAW *pDraw)
 {
-  display::DisplayBuffer *display = (display::DisplayBuffer*)pDraw->pUser;
+  display::Display *display = (display::Display*)pDraw->pUser;
 
   const uint16_t *data = pDraw->pPixels;
   for (int y = 0; y < pDraw->iHeight; y++) {
@@ -162,7 +162,7 @@ static int jpeg_draw(JPEGDRAW *pDraw)
 }
 #endif // USE_JPEGDEC
 
-void Image::draw_jpeg(int x, int y, display::DisplayBuffer *display) {
+void Image::draw_jpeg(int x, int y, display::Display *display) {
 #ifdef USE_JPEGDEC
   JPEGDEC* jpeg = new JPEGDEC();
 

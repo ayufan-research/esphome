@@ -42,7 +42,7 @@ class Image : public display::BaseImage {
   int get_height() const override;
   ImageType get_type() const;
 
-  void draw(int x, int y, display::DisplayBuffer *display, Color color_on, Color color_off) override;
+  void draw(int x, int y, display::Display *display, Color color_on, Color color_off) override;
 
   void set_transparency(bool transparent) { transparent_ = transparent; }
   bool has_transparency() const { return transparent_; }
@@ -53,7 +53,7 @@ class Image : public display::BaseImage {
   Color get_rgba_pixel_(int x, int y) const;
   Color get_rgb565_pixel_(int x, int y) const;
   Color get_grayscale_pixel_(int x, int y) const;
-  void draw_jpeg(int x, int y, display::DisplayBuffer *display);
+  void draw_jpeg(int x, int y, display::Display *display);
 
   int data_size_;
   int width_;

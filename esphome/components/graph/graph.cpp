@@ -303,7 +303,7 @@ void GraphLegend::init(Graph *g) {
   }
 }
 
-void Graph::draw_legend(display::DisplayBuffer *buff, uint16_t x_offset, uint16_t y_offset, Color color) {
+void Graph::draw_legend(display::Display *buff, uint16_t x_offset, uint16_t y_offset, Color color) {
   if (!legend_)
     return;
 
