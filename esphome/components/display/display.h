@@ -133,12 +133,10 @@ enum DisplayRotation {
 };
 
 class Display;
-class DisplayBuffer;
 class DisplayPage;
 class DisplayOnPageChangeTrigger;
 
 using display_writer_t = std::function<void(Display &)>;
-using display_buffer_writer_t = std::function<void(DisplayBuffer &)>;
 
 #define LOG_DISPLAY(prefix, type, obj) \
   if ((obj) != nullptr) { \
@@ -408,9 +406,6 @@ class Display {
 
   /// Internal method to set the display writer lambda.
   void set_writer(display_writer_t &&writer);
-  void set_writer(display_buffer_writer_t writer) {
-    this->set_writer([writer](Display& display) { return writer((display::DisplayBuffer&)display); });
-  }
 
   void show_page(DisplayPage *page);
   void show_next_page();
@@ -495,8 +490,6 @@ class Display {
 class DisplayPage {
  public:
   DisplayPage(display_writer_t writer);
-  DisplayPage(display_buffer_writer_t writer) : DisplayPage(
-    [writer](Display& display) { return writer((display::DisplayBuffer&)display); }) {}
   void show();
   void show_next();
   void show_prev();
