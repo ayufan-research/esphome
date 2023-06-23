@@ -15,6 +15,15 @@ static const char *TAG = "image";
 void Image::draw(int x, int y, display::Display *display, Color color_on, Color color_off) {
   switch (type_) {
     case IMAGE_TYPE_BINARY: {
+      if (display->draw_pixels_at(
+        x, y,
+        width_, height_,
+        data_start_, data_size_,
+        this->transparent_ ? display::PixelFormat::A1 : display::PixelFormat::W1,
+        color_on, color_off)) {
+        return;
+      }
+
       for (int img_x = 0; img_x < width_; img_x++) {
         for (int img_y = 0; img_y < height_; img_y++) {
           if (this->get_binary_pixel_(img_x, img_y)) {
@@ -27,6 +36,13 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       break;
     }
     case IMAGE_TYPE_GRAYSCALE:
+      if (display->draw_pixels_at(
+        x, y,
+        width_, height_,
+        data_start_, data_size_,
+        this->transparent_ ? display::PixelFormat::W8_KEY : display::PixelFormat::W8)) {
+        return;
+      }
       for (int img_x = 0; img_x < width_; img_x++) {
         for (int img_y = 0; img_y < height_; img_y++) {
           auto color = this->get_grayscale_pixel_(img_x, img_y);
@@ -37,6 +53,13 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       }
       break;
     case IMAGE_TYPE_RGB565:
+      if (display->draw_pixels_at(
+        x, y,
+        width_, height_,
+        data_start_, data_size_,
+        display::PixelFormat::RGB565_BE)) {
+        return;
+      }
       for (int img_x = 0; img_x < width_; img_x++) {
         for (int img_y = 0; img_y < height_; img_y++) {
           auto color = this->get_rgb565_pixel_(img_x, img_y);
@@ -47,6 +70,13 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       }
       break;
     case IMAGE_TYPE_RGB24:
+      if (display->draw_pixels_at(
+        x, y,
+        width_, height_,
+        data_start_, data_size_,
+        display::PixelFormat::RGB888)) {
+        return;
+      }
       for (int img_x = 0; img_x < width_; img_x++) {
         for (int img_y = 0; img_y < height_; img_y++) {
           auto color = this->get_rgb24_pixel_(img_x, img_y);
@@ -57,6 +87,13 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       }
       break;
     case IMAGE_TYPE_RGBA:
+      if (display->draw_pixels_at(
+        x, y,
+        width_, height_,
+        data_start_, data_size_,
+        display::PixelFormat::RGBA8888)) {
+        return;
+      }
       for (int img_x = 0; img_x < width_; img_x++) {
         for (int img_y = 0; img_y < height_; img_y++) {
           auto color = this->get_rgba_pixel_(img_x, img_y);
