@@ -474,14 +474,19 @@ class Display {
    *
    * return rect for active clipping region
    */
-  Rect get_clipping();
+  Rect get_clipping() const;
 
   bool is_clipping() const { return !this->clipping_rectangle_.empty(); }
+
+  bool clip(int x, int y);
+  bool clamp_x(int x, int w, int &min_x, int &max_x);
+  bool clamp_y(int y, int h, int &min_y, int &max_y);
 
  protected:
   void vprintf_(int x, int y, BaseFont *font, Color color, TextAlign align, const char *format, va_list arg);
 
   void do_update_();
+  void clear_clipping_();
 
   DisplayRotation rotation_{DISPLAY_ROTATION_0_DEGREES};
   optional<display_writer_t> writer_{};
