@@ -18,11 +18,10 @@ from esphome.core import coroutine_with_priority
 IS_PLATFORM_COMPONENT = True
 
 display_ns = cg.esphome_ns.namespace("display")
-Display = display_ns.class_("Display")
 DisplayBuffer = display_ns.class_("DisplayBuffer")
 DisplayPage = display_ns.class_("DisplayPage")
 DisplayPagePtr = DisplayPage.operator("ptr")
-DisplayRef = Display.operator("ref")
+DisplayBufferRef = DisplayBuffer.operator("ref")
 DisplayPageShowAction = display_ns.class_("DisplayPageShowAction", automation.Action)
 DisplayPageShowNextAction = display_ns.class_(
     "DisplayPageShowNextAction", automation.Action
@@ -97,7 +96,7 @@ async def setup_display_core_(var, config):
         pages = []
         for conf in config[CONF_PAGES]:
             lambda_ = await cg.process_lambda(
-                conf[CONF_LAMBDA], [(DisplayRef, "it")], return_type=cg.void
+                conf[CONF_LAMBDA], [(DisplayBufferRef, "it")], return_type=cg.void
             )
             page = cg.new_Pvariable(conf[CONF_ID], lambda_)
             pages.append(page)
