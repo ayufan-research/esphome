@@ -174,7 +174,7 @@ Color Image::get_grayscale_pixel_(int x, int y) const {
 }
 
 #ifdef USE_JPEGDEC
-static int jpeg_draw(JPEGDRAW *pDraw)
+static int jpeg_draw_rgb565_by_pixel(JPEGDRAW *pDraw)
 {
   display::Display *display = (display::Display*)pDraw->pUser;
 
@@ -197,15 +197,52 @@ static int jpeg_draw(JPEGDRAW *pDraw)
   }
   return 1;
 }
+
+static int jpeg_draw_by_native(JPEGDRAW *pDraw)
+{
+  display::Display *display = (display::Display*)pDraw->pUser;
+  display->draw_pixels_at(
+    pDraw->x, pDraw->y,
+    pDraw->iWidth, pDraw->iHeight,
+    (const uint8_t*)pDraw->pPixels,
+    pDraw->iBpp * pDraw->iWidth * pDraw->iHeight / 8,
+    display->get_native_pixel_format()
+  );
+  return 1;
+}
 #endif // USE_JPEGDEC
 
 void Image::draw_jpeg(int x, int y, display::Display *display) {
 #ifdef USE_JPEGDEC
   JPEGDEC* jpeg = new JPEGDEC();
+  int nativeFormat = -1;
 
-  if (jpeg->openFLASH((uint8_t*)this->data_start_, this->data_size_, jpeg_draw)) {
+  switch (display->get_native_pixel_format()) {
+    case display::PixelFormat::RGB565:
+      nativeFormat = RGB565_LITTLE_ENDIAN;
+      break;
+
+    case display::PixelFormat::RGB565_BE:
+      nativeFormat = RGB565_BIG_ENDIAN;
+      break;
+
+    case display::PixelFormat::W8:
+      nativeFormat = EIGHT_BIT_GRAYSCALE;
+      break;
+
+    default:
+      nativeFormat = -1;
+      break;
+  }
+
+  auto func = nativeFormat >= 0 ? jpeg_draw_by_native : jpeg_draw_rgb565_by_pixel;
+
+  if (jpeg->openFLASH((uint8_t*)this->data_start_, this->data_size_, func)) {
     jpeg->setUserPointer(display);
-    jpeg->setPixelType(RGB565_LITTLE_ENDIAN);
+    if (nativeFormat >= 0)
+      jpeg->setPixelType(nativeFormat);
+    else
+      jpeg->setPixelType(RGB565_LITTLE_ENDIAN);
     if (jpeg->decode(x, y, 0)) {
       ESP_LOGV("jpeg", "Decode succeeded");
     }
