@@ -175,6 +175,13 @@ static bool display_filled_rectangle_direct(int x, int y, int width, int height,
 }
 
 bool Display::filled_rectangle_(int x, int y, int width, int height, Color color) {
+  int min_x, max_x, min_y, max_y;
+
+  if (!this->clamp_x(x, width, min_x, max_x))
+    return true;
+  if (!this->clamp_y(y, height, min_y, max_y))
+    return true;
+
   auto get_pixels = [this](int y) {
     return this->get_native_pixels_(y);
   };
@@ -184,9 +191,9 @@ bool Display::filled_rectangle_(int x, int y, int width, int height, Color color
 
   #define FILLED_RECT_FORMAT(format) \
     case PixelFormat::format: \
-      if (display_filled_rectangle_direct<Pixel##format>(x, y, width, height, color, get_pixels)) \
+      if (display_filled_rectangle_direct<Pixel##format>(min_x, min_y, max_x - min_x, max_y - min_y, color, get_pixels)) \
         return true; \
-      if (display_filled_rectangle_alloc<Pixel##format>(x, y, width, height, color, draw_pixels)) \
+      if (display_filled_rectangle_alloc<Pixel##format>(min_x, min_y, max_x - min_x, max_y - min_y, color, draw_pixels)) \
         return true; \
       break
 
