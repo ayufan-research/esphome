@@ -322,17 +322,23 @@ static inline Out from_w(uint8_t w, uint8_t a = 0xFF) {
 }
 
 template<typename Out>
-static inline Out from_color(const Color &in, bool expand = false) {
-  Out out;
+static inline Out from_color(Out &out, const Color &in, int out_pixel = 0) {
   const uint8_t approx_w = (in.r >> 2) + (in.g >> 1) + (in.b >> 2);
   out.encode(
     shift_bits<8, Out::R>(in.r),
     shift_bits<8, Out::G>(in.g),
     shift_bits<8, Out::B>(in.b),
     shift_bits<8, Out::A>(in.w),
-    shift_bits<8, Out::W>(approx_w)
+    shift_bits<8, Out::W>(approx_w),
+    out_pixel
   );
+  return out;
+}
 
+template<typename Out>
+static inline Out from_color(const Color &in, bool expand = true) {
+  Out out;
+  from_color(out, in);
   if (expand) {
     for (int i = 1; i < Out::PIXELS; i++) {
       from_pixel_format(out, i, out, 0);
