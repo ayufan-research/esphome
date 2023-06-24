@@ -22,31 +22,31 @@ enum class PixelFormat {
   RGBA8888
 };
 
-#define EXPORT_SRC_PIXEL_FORMAT(MACRO, IGNORE_MACRO) \
-  IGNORE_MACRO(Unknown); \
-  MACRO(A1); \
-  MACRO(W1); \
-  MACRO(W8); \
-  MACRO(W8_KEY); \
-  MACRO(RGB332); \
-  MACRO(RGB565); \
-  MACRO(RGB565_BE); \
-  MACRO(RGB888); \
-  MACRO(RGBA4444); \
-  MACRO(RGBA8888);
+#define EXPORT_SRC_PIXEL_FORMAT(MACRO, IGNORE_MACRO, ...) \
+  IGNORE_MACRO(Unknown, ##__VA_ARGS__); \
+  MACRO(A1, ##__VA_ARGS__); \
+  MACRO(W1, ##__VA_ARGS__); \
+  MACRO(W8, ##__VA_ARGS__); \
+  MACRO(W8_KEY, ##__VA_ARGS__); \
+  MACRO(RGB332, ##__VA_ARGS__); \
+  MACRO(RGB565, ##__VA_ARGS__); \
+  MACRO(RGB565_BE, ##__VA_ARGS__); \
+  MACRO(RGB888, ##__VA_ARGS__); \
+  MACRO(RGBA4444, ##__VA_ARGS__); \
+  MACRO(RGBA8888, ##__VA_ARGS__);
 
-#define EXPORT_DEST_PIXEL_FORMAT(MACRO, IGNORE_MACRO) \
-  IGNORE_MACRO(Unknown); \
-  IGNORE_MACRO(A1); \
-  IGNORE_MACRO(W1); \
-  MACRO(W8); \
-  IGNORE_MACRO(W8_KEY); \
-  MACRO(RGB332); \
-  MACRO(RGB565); \
-  MACRO(RGB565_BE); \
-  MACRO(RGB888); \
-  MACRO(RGBA4444); \
-  MACRO(RGBA8888);
+#define EXPORT_DEST_PIXEL_FORMAT(MACRO, IGNORE_MACRO, ...) \
+  IGNORE_MACRO(Unknown, ##__VA_ARGS__); \
+  IGNORE_MACRO(A1, ##__VA_ARGS__); \
+  IGNORE_MACRO(W1, ##__VA_ARGS__); \
+  MACRO(W8, ##__VA_ARGS__); \
+  IGNORE_MACRO(W8_KEY, ##__VA_ARGS__); \
+  MACRO(RGB332, ##__VA_ARGS__); \
+  MACRO(RGB565, ##__VA_ARGS__); \
+  MACRO(RGB565_BE, ##__VA_ARGS__); \
+  MACRO(RGB888, ##__VA_ARGS__); \
+  MACRO(RGBA4444, ##__VA_ARGS__); \
+  MACRO(RGBA8888, ##__VA_ARGS__);
 
 template<int In, int Out>
 inline uint8_t shift_bits(uint8_t src) {
