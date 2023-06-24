@@ -5,32 +5,123 @@
 namespace esphome {
 namespace display {
 
-template<typename SrcPixelFormat, typename DestPixelFormat, bool Transparency>
-void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int src_x, int width, DestPixelFormat color_on, DestPixelFormat color_off)
+template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
+inline void bitblt_fast(
+  DestPixelFormat *dest_p, const SrcPixelFormat *src_p, int width,
+  DestPixelFormat color_on, DestPixelFormat color_off)
 {
-  auto p = offset_buffer(dest, dest_x);
-  auto endp = offset_end_buffer(dest, dest_x + width);
-  if (p == endp)
-    return;
+  auto dest_end_p = offset_end_buffer(dest_p, width);
 
-  // does not support packed pixels
-  static_assert(DestPixelFormat::PIXELS == 1);
+  for ( ; dest_p < dest_end_p; dest_p++, src_p++) {
+    if (Transparency && src_p->is_transparent(0)) {
+      continue;
+    }
 
-  for ( ; p < endp; ) {
-    const auto &src_p = *src++;
+    if (SrcPixelFormat::COLOR_KEY) {
+      if (src_p->is_on(0))
+        *dest_p = color_on;
+      else
+        *dest_p = color_off;
+    } else {
+      from_pixel_format(*dest_p, 0, *src_p, 0);
+    }
+  }
+}
 
-    for (int i = 0; i < SrcPixelFormat::PIXELS && p < endp; i++) {
-      if (Transparency && src_p.is_transparent(i)) {
-        p++;
+template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
+inline void bitblt_semi_fast_src_pixels(
+  DestPixelFormat *dest_p, const SrcPixelFormat *src_p, int src_pixel, int width,
+  DestPixelFormat color_on, DestPixelFormat color_off)
+{
+  auto dest_end_p = offset_end_buffer(dest_p, width);
+
+  for ( ; dest_p < dest_end_p; src_p++, src_pixel = 0) {
+    for ( ; src_pixel < SrcPixelFormat::PIXELS && dest_p < dest_end_p; src_pixel++, dest_p++) {
+      if (Transparency && src_p->is_transparent(src_pixel)) {
         continue;
       }
 
       if (SrcPixelFormat::COLOR_KEY) {
-        *p++ = src_p.is_on(i) ? color_on : color_off;
+        if (src_p->is_on(src_pixel))
+          *dest_p = color_on;
+        else
+          *dest_p = color_off;
       } else {
-        *p++ = from_pixel_format<DestPixelFormat, SrcPixelFormat>(src_p, i);
+        from_pixel_format(*dest_p, 0, *src_p, src_pixel);
       }
     }
+  }
+}
+
+template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
+inline void bitblt_semi_fast_dest_pixels(
+  DestPixelFormat *dest_p, int dest_pixel, const SrcPixelFormat *src_p, int width,
+  DestPixelFormat color_on, DestPixelFormat color_off)
+{
+  auto src_end_p = offset_end_buffer(src_p, width);
+
+  for ( ; src_p < src_end_p; dest_p++, dest_pixel = 0) {
+    for ( ; dest_pixel < DestPixelFormat::PIXELS && src_p < src_end_p; dest_pixel++, src_p++) {
+      if (Transparency && src_p->is_transparent(0)) {
+        continue;
+      }
+
+      if (SrcPixelFormat::COLOR_KEY) {
+        if (src_p->is_on(0))
+          from_pixel_format(*dest_p, dest_pixel, color_on);
+        else
+          from_pixel_format(*dest_p, dest_pixel, color_off);
+      } else {
+        from_pixel_format(*dest_p, dest_pixel, *src_p);
+      }
+    }
+  }
+}
+
+template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
+inline void bitblt_slow_src_dest_pixels(
+  DestPixelFormat *dest_p, int dest_pixel, const SrcPixelFormat *src_p, int src_pixel, int width,
+  DestPixelFormat color_on, DestPixelFormat color_off)
+{
+  for (int pixels = 0; pixels < width; src_p++, src_pixel = 0) {
+    for ( ; src_pixel < DestPixelFormat::PIXELS && pixels < width; src_pixel++, dest_pixel++, pixels++) {
+      assert(dest_pixel <= DestPixelFormat::PIXELS);
+
+      if (dest_pixel == DestPixelFormat::PIXELS) {
+        dest_p++;
+        dest_pixel = 0;
+      }
+
+      if (Transparency && src_p->is_transparent(src_pixel)) {
+        continue;
+      }
+
+      if (SrcPixelFormat::COLOR_KEY) {
+        if (src_p->is_on(src_pixel))
+          from_pixel_format(*dest_p, dest_pixel, color_on);
+        else
+          from_pixel_format(*dest_p, dest_pixel, color_off);
+      } else {
+        from_pixel_format(*dest_p, dest_pixel, *src_p, src_pixel);
+      }
+    }
+  }
+}
+
+template<typename SrcPixelFormat, typename DestPixelFormat, bool Transparency>
+void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int src_x, int width, DestPixelFormat color_on, DestPixelFormat color_off)
+{
+  auto dest_p = offset_buffer(dest, dest_x);
+  auto src_p = offset_buffer(src, src_x);
+
+  if (SrcPixelFormat::PIXELS == 1 && DestPixelFormat::PIXELS == 1) {
+    bitblt_fast<Transparency>(dest_p, src_p, width, color_on, color_off);
+  } else if (SrcPixelFormat::PIXELS != 1) {
+    bitblt_semi_fast_src_pixels<Transparency>(dest_p, src_p, SrcPixelFormat::offset(src_x), width, color_on, color_off);
+  } else if (DestPixelFormat::PIXELS != 1) {
+    bitblt_semi_fast_dest_pixels<Transparency>(dest_p, DestPixelFormat::offset(dest_x), src_p, width, color_on, color_off);
+  } else {
+    bitblt_slow_src_dest_pixels<Transparency>(dest_p, DestPixelFormat::offset(dest_x), src_p, SrcPixelFormat::offset(src_x), width, color_on, color_off);
   }
 }
 

@@ -275,7 +275,7 @@ struct PixelA1 : PixelDetails<PixelFormat::A1,0,0,0,1,0,1,8,true> {
   }
 } PACKED;
 
-struct PixelW4 : PixelDetails<PixelFormat::W4,0,0,0,0,4,1> {
+struct PixelW4 : PixelDetails<PixelFormat::W4,0,0,0,0,4,1,2> {
   uint8_t raw_8;
 
   inline bool is_on(int pixel = 0) const {

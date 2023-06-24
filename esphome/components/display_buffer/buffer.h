@@ -10,9 +10,6 @@ template<typename PixelFormat>
 class Buffer : public PollingComponent,
                     public display::Display {
  public:
-  // Buffer does not support packed pixels
-  static_assert(PixelFormat::PIXELS == 1);
-
   void dump_config() override;
   void setup() override;
   void update() override;
