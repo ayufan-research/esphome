@@ -79,49 +79,6 @@ PixelFormat *Buffer<PixelFormat>::get_native_pixels_(int x, int y) {
 }
 
 template<typename PixelFormat>
-bool Buffer<PixelFormat>::draw_pixels_(int x_at, int y_at, int w, int h, const uint8_t *data, int data_line_size, int data_stride) {
-  auto start_offset = PixelFormat::pixel_offset(x_at);
-  auto end_offset = PixelFormat::pixel_offset(x_at + w);
-
-  if (!data_line_size) {
-    return true;
-  }
-
-  for (int i = 0; i < h; i++) {
-    auto dest = this->get_native_pixels_(x_at, y_at + i);
-    if (!dest)
-      return false;
-
-    auto src = data + data_stride * i;
-    auto src_end = src + data_line_size;
-
-    if (PixelFormat::PIXELS > 1) {
-      auto dest_end = dest + data_line_size;
-
-      // copy starting pixels
-      if (start_offset > 0) {
-        display::copy_pixel(((PixelFormat*)dest)[0], ((PixelFormat*)src)[0], start_offset);
-        src += PixelFormat::BYTES;
-        dest += PixelFormat::BYTES;
-      }
-
-      // copy ending pixels
-      if (end_offset > 0 && src < src_end) {
-        display::copy_pixel(((PixelFormat*)dest_end)[-1] , ((PixelFormat*)src_end)[-1], 0, end_offset);
-        src_end -= PixelFormat::BYTES;
-
-        if (src >= src_end)
-          continue;
-      }
-    }
-
-    memcpy(dest, src, src_end - src);
-  }
- 
-  return true;
-}
-
-template<typename PixelFormat>
 void Buffer<PixelFormat>::draw(display::Display *display) {
   display->draw_pixels_at(
     0, 0, this->width_, this->height_,
