@@ -5,6 +5,33 @@
 namespace esphome {
 namespace display {
 
+template<typename PixelFormat>
+inline void bitblt_copy(
+  PixelFormat *dest_p, const PixelFormat *src_p, int x, int width)
+{
+  auto dest_end_p = offset_end_buffer(dest_p, x + width);
+  if (dest_p == dest_end_p)
+    return;
+  auto src_end_p = offset_end_buffer(src_p, x + width);
+
+  // copy starting pixels
+  if (x > 0) {
+    copy_pixel(*dest_p++, *src_p++, x);
+    if (dest_p == dest_end_p)
+      return;
+  }
+
+  // copy ending pixels
+  int end_x = PixelFormat::pixel_index(x + width);
+  if (end_x > 0) {
+    copy_pixel(*--dest_end_p, *--src_end_p, 0, end_x);
+    if (dest_p == dest_end_p)
+      return;
+  }
+
+  memcpy(dest_p, src_p, (dest_end_p - dest_p) * PixelFormat::BYTES);
+}
+
 template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
 inline void bitblt_fast(
   DestPixelFormat *dest_p, const SrcPixelFormat *src_p, int width,
@@ -114,14 +141,16 @@ void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int sr
   auto dest_p = offset_buffer(dest, dest_x);
   auto src_p = offset_buffer(src, src_x);
 
-  if (SrcPixelFormat::PIXELS == 1 && DestPixelFormat::PIXELS == 1) {
+  if (SrcPixelFormat::FORMAT == DestPixelFormat::FORMAT && DestPixelFormat::pixel_index(dest_x) == SrcPixelFormat::pixel_index(src_x)) {
+    bitblt_copy(dest_p, (DestPixelFormat*)src_p, SrcPixelFormat::pixel_index(src_x), width);
+  } else if (SrcPixelFormat::PIXELS == 1 && DestPixelFormat::PIXELS == 1) {
     bitblt_fast<Transparency>(dest_p, src_p, width, color_on, color_off);
   } else if (SrcPixelFormat::PIXELS != 1) {
-    bitblt_semi_fast_src_pixels<Transparency>(dest_p, src_p, SrcPixelFormat::offset(src_x), width, color_on, color_off);
+    bitblt_semi_fast_src_pixels<Transparency>(dest_p, src_p, SrcPixelFormat::pixel_index(src_x), width, color_on, color_off);
   } else if (DestPixelFormat::PIXELS != 1) {
-    bitblt_semi_fast_dest_pixels<Transparency>(dest_p, DestPixelFormat::offset(dest_x), src_p, width, color_on, color_off);
+    bitblt_semi_fast_dest_pixels<Transparency>(dest_p, DestPixelFormat::pixel_index(dest_x), src_p, width, color_on, color_off);
   } else {
-    bitblt_slow_src_dest_pixels<Transparency>(dest_p, DestPixelFormat::offset(dest_x), src_p, SrcPixelFormat::offset(src_x), width, color_on, color_off);
+    bitblt_slow_src_dest_pixels<Transparency>(dest_p, DestPixelFormat::pixel_index(dest_x), src_p, SrcPixelFormat::pixel_index(src_x), width, color_on, color_off);
   }
 }
 
@@ -135,7 +164,7 @@ void fill(PixelFormat *dest, int x, int width, const PixelFormat &color)
 
   // handle packed pixels
   if (PixelFormat::PIXELS > 1) {
-    auto start_offset = PixelFormat::pixel_offset(x);
+    auto start_offset = PixelFormat::pixel_index(x);
 
     // copy start pixels
     if (start_offset > 0) {
@@ -144,7 +173,7 @@ void fill(PixelFormat *dest, int x, int width, const PixelFormat &color)
     }
 
     // copy end pixels
-    auto end_offset = PixelFormat::pixel_offset(x + width);
+    auto end_offset = PixelFormat::pixel_index(x + width);
     if (end_offset > 0 && destp < endp) {
       --endp;
       copy_pixel(*endp, color, 0, end_offset);
