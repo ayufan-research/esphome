@@ -19,7 +19,7 @@ static bool display_direct_draw(int x, int y, int width, int height,
 
   // If pixel is offset, it requires buffer re-alignement, or direct rendering
   if (PixelFormat::PIXELS > 1) {
-    auto pixel_offset = PixelFormat::pixel_offset(x);
+    auto pixel_offset = PixelFormat::pixel_index(x);
     if (pixel_offset != src_x)
       return false;
   }
@@ -32,7 +32,7 @@ static bool display_direct_draw(int x, int y, int width, int height,
   );
 
   if (done) {
-    ESP_LOGI(TAG, "Direct Draw: %dx%d/%dx%d, src_x=%d, stride=%d, format=%d, time_us=%d",
+    ESP_LOGV(TAG, "Direct Draw: %dx%d/%dx%d, src_x=%d, stride=%d, format=%d, time_us=%d",
       x, y, width, height,
       src_x, src_stride, PixelFormat::FORMAT,
       micros() - start_us);
@@ -75,7 +75,7 @@ static bool display_convert_draw(
   }
 
   if (done) {
-    ESP_LOGI(TAG, "%s Draw: %dx%d/%dx%d, src_x=%d, stride=%d, src_format=%d, dest_format=%d, time_us=%d",
+    ESP_LOGV(TAG, "%s Draw: %dx%d/%dx%d, src_x=%d, stride=%d, src_format=%d, dest_format=%d, time_us=%d",
       SrcPixelFormat::COLOR_KEY ? "Keyed" : "Convert",
       x, y, width, height,
       src_x, src_stride,
@@ -114,7 +114,7 @@ static bool display_convert_buffer(
     src = (const SrcPixelFormat*)((const uint8_t*)src + src_stride);
   }
 
-  ESP_LOGI(TAG, "%s Blt: %dx%d/%dx%d, src_x=%d, stride=%d, src_format=%d, dest_format=%d, time_us=%d",
+  ESP_LOGV(TAG, "%s Blt: %dx%d/%dx%d, src_x=%d, stride=%d, src_format=%d, dest_format=%d, time_us=%d",
     SrcPixelFormat::COLOR_KEY ? "Keyed" : "Convert",
     x, y, width, height,
     src_x, src_stride,
