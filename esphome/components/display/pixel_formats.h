@@ -40,7 +40,7 @@ enum class PixelFormat {
 #define EXPORT_DEST_PIXEL_FORMAT(MACRO, IGNORE_MACRO, ...) \
   IGNORE_MACRO(Unknown, ##__VA_ARGS__); \
   IGNORE_MACRO(A1, ##__VA_ARGS__); \
-  IGNORE_MACRO(W1, ##__VA_ARGS__); \
+  MACRO(W1, ##__VA_ARGS__); \
   MACRO(W4, ##__VA_ARGS__); \
   MACRO(W8, ##__VA_ARGS__); \
   IGNORE_MACRO(W8_KEY, ##__VA_ARGS__); \
