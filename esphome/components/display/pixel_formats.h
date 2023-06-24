@@ -12,6 +12,7 @@ enum class PixelFormat {
   Unknown,
   A1,
   W1,
+  W2,
   W4,
   W8,
   W8_KEY,
@@ -27,6 +28,7 @@ enum class PixelFormat {
   IGNORE_MACRO(Unknown, ##__VA_ARGS__); \
   MACRO(A1, ##__VA_ARGS__); \
   MACRO(W1, ##__VA_ARGS__); \
+  MACRO(W2, ##__VA_ARGS__); \
   MACRO(W4, ##__VA_ARGS__); \
   MACRO(W8, ##__VA_ARGS__); \
   MACRO(W8_KEY, ##__VA_ARGS__); \
@@ -41,6 +43,7 @@ enum class PixelFormat {
   IGNORE_MACRO(Unknown, ##__VA_ARGS__); \
   IGNORE_MACRO(A1, ##__VA_ARGS__); \
   MACRO(W1, ##__VA_ARGS__); \
+  MACRO(W2, ##__VA_ARGS__); \
   MACRO(W4, ##__VA_ARGS__); \
   MACRO(W8, ##__VA_ARGS__); \
   IGNORE_MACRO(W8_KEY, ##__VA_ARGS__); \
@@ -272,6 +275,25 @@ struct PixelA1 : PixelDetails<PixelFormat::A1,0,0,0,1,0,1,8,true> {
   inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = 0; g = 0; b = 0; w = 0;
     a = (this->raw_8 & (1<<(7-pixel))) ? 1 : 0;
+  }
+} PACKED;
+
+struct PixelW2 : PixelDetails<PixelFormat::W2,0,0,0,0,2,1,4> {
+  uint8_t raw_8;
+
+  inline bool is_on(int pixel = 0) const {
+    return true;
+  }
+  inline bool is_transparent(int pixel = 0) const {
+    return false;
+  }
+  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+    this->raw_8 &= ~(3 << (pixel*2));
+    this->raw_8 |= w << (pixel*2);
+  }
+  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+    r = 0; g = 0; b = 0; a = 0;
+    w = (this->raw_8 >> (pixel*2)) & 0x3;
   }
 } PACKED;
 
