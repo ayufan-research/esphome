@@ -488,7 +488,9 @@ class Display {
 
  protected:
   virtual uint8_t *get_native_pixels_(int y) { return nullptr; }
-  virtual bool draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_length) { return false; }
+  virtual bool draw_pixels_(int x, int y, int w, int h,
+    const uint8_t *data, int data_line_size, int data_stride,
+    int pixel_offset) { return false; }
   virtual bool filled_rectangle_(int x1, int y1, int width, int height, Color color);
 
   void vprintf_(int x, int y, BaseFont *font, Color color, TextAlign align, const char *format, va_list arg);
