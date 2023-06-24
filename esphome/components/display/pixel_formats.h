@@ -407,11 +407,11 @@ static inline Out &copy_pixel(Out &out, const Out &in, int start_pixel = 0, int 
   return out;
 }
 
-template<typename SrcPixelFormat, typename DestPixelFormat>
-void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int src_x, int width);
+template<typename SrcPixelFormat, typename DestPixelFormat, bool Transparency>
+inline void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int width, DestPixelFormat color_on, DestPixelFormat color_off);
 
 template<typename PixelFormat>
-void fill(PixelFormat *dest, int x, int width, const PixelFormat &color);
+inline void fill(PixelFormat *dest, int x, int width, const PixelFormat &color);
 
 } // display
 } // esphome

@@ -5,10 +5,33 @@
 namespace esphome {
 namespace display {
 
-template<typename SrcPixelFormat, typename DestPixelFormat>
-void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int src_x, int width)
+template<typename SrcPixelFormat, typename DestPixelFormat, bool Transparency>
+void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int width, DestPixelFormat color_on, DestPixelFormat color_off)
 {
+  auto p = offset_buffer(dest, dest_x);
+  auto endp = offset_end_buffer(dest, dest_x + width);
+  if (p == endp)
+    return;
 
+  // does not support packed pixels
+  static_assert(DestPixelFormat::PIXELS == 1);
+
+  for ( ; p < endp; ) {
+    const auto &src_p = *src++;
+
+    for (int i = 0; i < SrcPixelFormat::PIXELS && p < endp; i++) {
+      if (Transparency && src_p.is_transparent(i)) {
+        p++;
+        continue;
+      }
+
+      if (SrcPixelFormat::COLOR_KEY) {
+        *p++ = src_p.is_on(i) ? color_on : color_off;
+      } else {
+        *p++ = from_pixel_format<DestPixelFormat, SrcPixelFormat>(src_p, i);
+      }
+    }
+  }
 }
 
 template<typename PixelFormat>
