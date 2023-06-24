@@ -94,7 +94,8 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       if (display->draw_pixels_at(
         x, y,
         width_, height_,
-        data_start_, data_size_,
+        data_start_,
+        display::PixelRGBA8888::bytes_stride(width_),
         display::PixelFormat::RGBA8888)) {
         return;
       }
@@ -209,7 +210,7 @@ static int jpeg_draw_by_native(JPEGDRAW *pDraw)
     pDraw->x, pDraw->y,
     pDraw->iWidth, pDraw->iHeight,
     (const uint8_t*)pDraw->pPixels,
-    pDraw->iBpp * pDraw->iWidth * pDraw->iHeight / 8,
+    pDraw->iBpp * pDraw->iWidth / 8,
     display->get_native_pixel_format()
   );
   return 1;
