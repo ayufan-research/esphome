@@ -59,7 +59,7 @@ void HOT Buffer<PixelFormat>::draw_pixel_at(int x, int y, Color color) {
   if (!dest)
     return;
 
-  *dest = display::from_color<PixelFormat>(color);
+  display::from_color<PixelFormat>(*dest, color, PixelFormat::pixel_offset(x));
   App.feed_wdt();
 }
 
