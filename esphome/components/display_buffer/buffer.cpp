@@ -79,22 +79,43 @@ PixelFormat *Buffer<PixelFormat>::get_native_pixels_(int x, int y) {
 }
 
 template<typename PixelFormat>
-bool Buffer<PixelFormat>::draw_pixels_(int x_at, int y_at, int w, int h, const uint8_t *data, int data_length) {
-  int min_x, max_x;
-  if (!this->clamp_x(x_at, w, min_x, max_x))
-    return true;
+bool Buffer<PixelFormat>::draw_pixels_(int x_at, int y_at, int w, int h, const uint8_t *data, int data_line_size, int data_stride, int pixel_offset) {
+  auto start_offset = PixelFormat::pixel_offset(x_at);
+  auto end_offset = PixelFormat::pixel_offset(x_at + w);
 
-  int min_y, max_y;
-  if (!this->clamp_x(y_at, h, min_y, max_y))
+  if (!data_line_size) {
     return true;
+  }
 
-  for (int y = min_y; y < max_y; y++) {
-    auto dest = this->get_native_pixels_(min_x, y);
+  for (int i = 0; i < h; i++) {
+    auto dest = this->get_native_pixels_(x_at, y_at + i);
     if (!dest)
       return false;
 
-    auto src = offset_buffer((const PixelFormat*)data, min_x - x_at, y - y_at, w);
-    memcpy(dest, src, PixelFormat::bytes_stride(max_x - min_x));
+    auto src = data + data_stride * i;
+    auto src_end = src + data_line_size;
+
+    if (PixelFormat::PIXELS > 1) {
+      auto dest_end = dest + data_line_size;
+
+      // copy starting pixels
+      if (start_offset > 0) {
+        display::copy_pixel(((PixelFormat*)dest)[0], ((PixelFormat*)src)[0], start_offset);
+        src += PixelFormat::BYTES;
+        dest += PixelFormat::BYTES;
+      }
+
+      // copy ending pixels
+      if (end_offset > 0 && src < src_end) {
+        display::copy_pixel(((PixelFormat*)dest_end)[-1] , ((PixelFormat*)src_end)[-1], 0, end_offset);
+        src_end -= PixelFormat::BYTES;
+
+        if (src >= src_end)
+          continue;
+      }
+    }
+
+    memcpy(dest, src, src_end - src);
   }
  
   return true;
