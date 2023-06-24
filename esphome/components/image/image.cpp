@@ -232,7 +232,6 @@ void Image::draw_jpeg(int x, int y, display::Display *display) {
   int nativeFormat = -1;
 
   data.display = display;
-  data.jpeg_format = RGB565_BIG_ENDIAN;
   data.pixel_format = display->get_native_pixel_format();
 
   switch (data.pixel_format) {
@@ -246,6 +245,11 @@ void Image::draw_jpeg(int x, int y, display::Display *display) {
 
     case display::PixelFormat::W8:
       data.jpeg_format = EIGHT_BIT_GRAYSCALE;
+      break;
+
+    default:
+      data.jpeg_format = RGB565_BIG_ENDIAN;
+      data.pixel_format = display::PixelFormat::RGB565_BE;
       break;
   }
 
