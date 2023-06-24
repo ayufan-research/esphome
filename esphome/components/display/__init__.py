@@ -47,6 +47,7 @@ DISPLAY_ROTATIONS = {
 
 PIXEL_TYPES = {
     "BINARY": display_ns.enum("PixelW1"),
+    "W4": display_ns.enum("PixelW4"),
     "GRAYSCALE": display_ns.enum("PixelW8"),
     "RGB332": display_ns.enum("PixelRGB332"),
     "RGB565": display_ns.enum("PixelRGB565_BE"),
