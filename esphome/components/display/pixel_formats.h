@@ -102,23 +102,20 @@ struct PixelDetails {
   static inline int pixel_index(int x) {
     return x % PIXELS;
   }
-  static inline int pixel_offset(int x) {
-    return x / PIXELS * PIXELS;
-  }
-  static inline int offset(int x) {
+  static inline int array_offset(int x) {
     return x / PIXELS;
   }
-  static inline int stride(int width) {
+  static inline int array_stride(int width) {
     return (width + PIXELS - 1) / PIXELS;
   }
-  static inline int stride(int width, int height) {
-    return stride(width) * height;
+  static inline int array_stride(int width, int height) {
+    return array_stride(width) * height;
   }
   static inline int bytes_stride(int width) {
-    return stride(width) * BYTES;
+    return array_stride(width) * BYTES;
   }
   static inline int bytes_stride(int width, int height) {
-    return stride(width, height) * BYTES;
+    return array_stride(width, height) * BYTES;
   }
 };
 
@@ -414,17 +411,17 @@ static inline Color to_color(const In &in, int pixel = 0) {
 
 template<typename Out>
 static inline Out *offset_buffer(Out *buffer, int x, int y, int width) {
-  return &buffer[y * Out::stride(width) + Out::offset(x)];
+  return &buffer[y * Out::array_stride(width) + Out::array_offset(x)];
 }
 
 template<typename Out>
 static inline Out *offset_buffer(Out *buffer, int x) {
-  return &buffer[Out::offset(x)];
+  return &buffer[Out::array_offset(x)];
 }
 
 template<typename Out>
 static inline Out *offset_end_buffer(Out *buffer, int x) {
-  return &buffer[Out::stride(x)];
+  return &buffer[Out::array_stride(x)];
 }
 
 template<typename Out, typename In>
