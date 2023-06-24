@@ -18,7 +18,8 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       if (display->draw_pixels_at(
         x, y,
         width_, height_,
-        data_start_, data_size_,
+        data_start_,
+        display::PixelW1::bytes_stride(width_),
         this->transparent_ ? display::PixelFormat::A1 : display::PixelFormat::W1,
         color_on, color_off)) {
         return;
@@ -39,7 +40,8 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       if (display->draw_pixels_at(
         x, y,
         width_, height_,
-        data_start_, data_size_,
+        data_start_,
+        display::PixelW8::bytes_stride(width_),
         this->transparent_ ? display::PixelFormat::W8_KEY : display::PixelFormat::W8)) {
         return;
       }
@@ -56,7 +58,8 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       if (display->draw_pixels_at(
         x, y,
         width_, height_,
-        data_start_, data_size_,
+        data_start_,
+        display::PixelRGB565_BE::bytes_stride(width_),
         display::PixelFormat::RGB565_BE)) {
         return;
       }
@@ -73,7 +76,8 @@ void Image::draw(int x, int y, display::Display *display, Color color_on, Color 
       if (display->draw_pixels_at(
         x, y,
         width_, height_,
-        data_start_, data_size_,
+        data_start_,
+        display::PixelRGB888::bytes_stride(width_),
         display::PixelFormat::RGB888)) {
         return;
       }
