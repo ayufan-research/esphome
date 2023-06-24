@@ -24,6 +24,7 @@ class Buffer : public PollingComponent,
 
   void set_width(int width) { this->width_ = width; }
   void set_height(int height) { this->height_ = height; }
+  void set_output(display::Display *output) { this->output_ = output; }
 
   void draw_pixel_at(int x, int y, Color color) override;
   void draw(display::Display *display);
@@ -33,6 +34,7 @@ class Buffer : public PollingComponent,
   PixelFormat *get_native_pixels_(int x, int y);
 
  protected:
+  display::Display *output_{nullptr};
   PixelFormat *buffer_{nullptr};
   int buffer_length_{0};
   int width_{0}, height_{0};
