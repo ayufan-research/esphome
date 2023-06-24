@@ -17,7 +17,7 @@ void Buffer<PixelFormat>::setup() {
   ExternalRAMAllocator<PixelFormat> allocator(ExternalRAMAllocator<PixelFormat>::ALLOW_FAILURE);
 
   this->buffer_length_ = PixelFormat::bytes_stride(this->width_, this->height_);
-  this->buffer_ = allocator.allocate(PixelFormat::stride(this->width_, this->height_));
+  this->buffer_ = allocator.allocate(PixelFormat::array_stride(this->width_, this->height_));
 
   if (this->buffer_ == nullptr) {
     ESP_LOGE(TAG, "Could not allocate buffer for framebuffer!");
