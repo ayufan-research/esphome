@@ -82,7 +82,8 @@ template<typename PixelFormat>
 void Buffer<PixelFormat>::draw(display::Display *display) {
   display->draw_pixels_at(
     0, 0, this->width_, this->height_,
-    (const uint8_t *)this->buffer_, this->buffer_length_,
+    (const uint8_t *)this->buffer_,
+    PixelFormat::bytes_stride(this->width_),
     PixelFormat::FORMAT);
 }
 
