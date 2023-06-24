@@ -58,6 +58,15 @@ template<int In, int Out>
 inline ALWAYS_INLINE uint8_t shift_bits(uint8_t src) {
   if (!In || !Out) {
     return 0;
+  } else if (In == 1) {
+    // expand: fast expand
+    return (src ? 0xFF : 0x00) >> (8 - Out);
+  } else if (In == 2) {
+    // expand: fast expand
+    uint8_t out = 0;
+    out |= src & 0x02 ? 0xAA : 0;
+    out |= src & 0x01 ? 0x55 : 0;
+    return out >> (8 - Out);
   } else if (In < Out) {
     // expand: In=5 => Out=8
     // src << (8-5) + src >> (5 - (8-5))
