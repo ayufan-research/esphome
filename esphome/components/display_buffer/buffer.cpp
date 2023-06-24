@@ -79,7 +79,7 @@ PixelFormat *Buffer<PixelFormat>::get_native_pixels_(int x, int y) {
 }
 
 template<typename PixelFormat>
-bool Buffer<PixelFormat>::draw_pixels_(int x_at, int y_at, int w, int h, const uint8_t *data, int data_line_size, int data_stride, int pixel_offset) {
+bool Buffer<PixelFormat>::draw_pixels_(int x_at, int y_at, int w, int h, const uint8_t *data, int data_line_size, int data_stride) {
   auto start_offset = PixelFormat::pixel_offset(x_at);
   auto end_offset = PixelFormat::pixel_offset(x_at + w);
 

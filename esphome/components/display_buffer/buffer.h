@@ -30,7 +30,7 @@ class Buffer : public PollingComponent,
 
  protected:
   uint8_t *get_native_pixels_(int y) override;
-  bool draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_line_size, int data_stride, int pixel_offset) override;
+  bool draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_line_size, int data_stride) override;
   PixelFormat *get_native_pixels_(int x, int y);
 
  protected:
