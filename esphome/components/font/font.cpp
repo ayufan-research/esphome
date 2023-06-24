@@ -19,7 +19,8 @@ void Glyph::draw(int x_at, int y_start, display::Display *display, Color color) 
   bool done = display->draw_pixels_at(
     x_at + scan_x1, y_start + scan_y1,
     scan_width, scan_height,
-    data, (scan_width + 7) / 8 * scan_height,
+    data,
+    display::PixelA1::bytes_stride(scan_width),
     display::PixelFormat::A1,
     color
   );
