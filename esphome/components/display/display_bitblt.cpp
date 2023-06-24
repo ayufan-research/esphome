@@ -19,8 +19,8 @@ static bool display_direct_draw(int x, int y, int width, int height,
 
   // If pixel is offset, it requires buffer re-alignement, or direct rendering
   if (PixelFormat::PIXELS > 1) {
-    auto pixel_offset = PixelFormat::pixel_index(x);
-    if (pixel_offset != src_x)
+    auto pixel_index = PixelFormat::pixel_index(x);
+    if (pixel_index != src_x)
       return false;
   }
 
@@ -47,8 +47,8 @@ static bool display_convert_draw(
   const SrcPixelFormat *src, int src_x, int src_stride,
   Color color_on, Color color_off, Fn draw_pixels
 ) {
-  auto width_stride = DestPixelFormat::stride(DestPixelFormat::offset(x) + width);
-  auto width_bytes_stride = DestPixelFormat::bytes_stride(DestPixelFormat::offset(x) + width);
+  auto width_stride = DestPixelFormat::array_stride(DestPixelFormat::pixel_index(x) + width);
+  auto width_bytes_stride = DestPixelFormat::bytes_stride(DestPixelFormat::pixel_index(x) + width);
   auto dest = new DestPixelFormat[width_stride];
   bool done = true;
   DestPixelFormat dest_on, dest_off;
@@ -62,7 +62,7 @@ static bool display_convert_draw(
 
   for (int j = 0; j < height && done; j++) {
     bitblt<SrcPixelFormat, DestPixelFormat, false>(
-      dest, DestPixelFormat::offset(x),
+      dest, DestPixelFormat::pixel_index(x),
       src, src_x, width,
       dest_on, dest_off
     );
@@ -165,7 +165,7 @@ bool HOT Display::draw_pixels_at(int x, int y, int width, int height, const uint
     case PixelFormat::src_format: \
       { \
         auto src_data = offset_buffer((const Pixel##src_format*)data, min_x - x, min_y - y, width); \
-        auto src_pixel_offset = Pixel##src_format::offset(min_x - x); \
+        auto src_pixel_offset = Pixel##src_format::pixel_index(min_x - x); \
         auto native_format = this->get_native_pixel_format(); \
         if (native_format == PixelFormat::src_format) { \
           if (display_direct_draw( \
@@ -189,7 +189,7 @@ bool HOT Display::draw_pixels_at(int x, int y, int width, int height, const uint
 
 template<typename Format, typename Fn>
 static bool display_filled_rectangle_alloc(int x, int y, int width, int height, Color color, Fn draw_pixels) {
-  auto width_stride = Format::stride(width);
+  auto width_stride = Format::array_stride(width + Format::pixel_index(x));
   auto dest = new Format[width_stride];
   auto pixel_color = from_color<Format>(color);
 
