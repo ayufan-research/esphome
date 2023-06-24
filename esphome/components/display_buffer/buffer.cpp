@@ -80,6 +80,8 @@ PixelFormat *Buffer<PixelFormat>::get_native_pixels_(int x, int y) {
 
 template<typename PixelFormat>
 void Buffer<PixelFormat>::draw(display::Display *display) {
+  ESP_LOGI(TAG, "Swap buffer: %dx%d, stride=%d, format=%d",
+    width_, height_, PixelFormat::bytes_stride(this->width_), PixelFormat::FORMAT);
   display->draw_pixels_at(
     0, 0, this->width_, this->height_,
     (const uint8_t *)this->buffer_,
