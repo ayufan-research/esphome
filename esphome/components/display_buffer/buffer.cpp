@@ -59,7 +59,7 @@ void HOT Buffer<PixelFormat>::draw_pixel_at(int x, int y, Color color) {
   if (!dest)
     return;
 
-  display::from_color<PixelFormat>(*dest, color, PixelFormat::pixel_offset(x));
+  display::from_color<PixelFormat>(*dest, color, PixelFormat::pixel_index(x));
   App.feed_wdt();
 }
 
@@ -80,7 +80,7 @@ PixelFormat *Buffer<PixelFormat>::get_native_pixels_(int x, int y) {
 
 template<typename PixelFormat>
 void Buffer<PixelFormat>::draw(display::Display *display) {
-  ESP_LOGI(TAG, "Swap buffer: %dx%d, stride=%d, format=%d",
+  ESP_LOGV(TAG, "Swap buffer: %dx%d, stride=%d, format=%d",
     width_, height_, PixelFormat::bytes_stride(this->width_), PixelFormat::FORMAT);
   display->draw_pixels_at(
     0, 0, this->width_, this->height_,
