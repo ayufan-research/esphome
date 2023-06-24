@@ -93,8 +93,11 @@ struct PixelDetails {
   static const int PIXELS = PP;
   static const bool COLOR_KEY = CCOLOR_KEY;
 
-  static inline int index(int x) {
+  static inline int pixel_index(int x) {
     return x % PIXELS;
+  }
+  static inline int pixel_offset(int x) {
+    return x / PIXELS * PIXELS;
   }
   static inline int offset(int x) {
     return x / PIXELS;
@@ -319,7 +322,7 @@ static inline Out from_w(uint8_t w, uint8_t a = 0xFF) {
 }
 
 template<typename Out>
-static inline Out from_color(const Color &in) {
+static inline Out from_color(const Color &in, bool expand = false) {
   Out out;
   const uint8_t approx_w = (in.r >> 2) + (in.g >> 1) + (in.b >> 2);
   out.encode(
@@ -329,6 +332,12 @@ static inline Out from_color(const Color &in) {
     shift_bits<8, Out::A>(in.w),
     shift_bits<8, Out::W>(approx_w)
   );
+
+  if (expand) {
+    for (int i = 1; i < Out::PIXELS; i++) {
+      from_pixel_format(out, i, out, 0);
+    }
+  }
   return out;
 }
 
@@ -356,9 +365,9 @@ static inline Out *offset_buffer(Out *buffer, int x) {
 }
 
 template<typename Out, typename In>
-static inline Out &from_pixel_format(Out &out, const In &in, int pixel = 0) {
+static inline Out &from_pixel_format(Out &out, int out_pixel, const In &in, int in_pixel = 0) {
   uint8_t r, g, b, a, w;
-  in.decode(r, g, b, a, w, pixel);
+  in.decode(r, g, b, a, w, in_pixel);
 
   uint8_t approx_w = shift_bits<In::R, 6>(r) + shift_bits<In::G, 7>(g) + shift_bits<In::B, 6>(b);
 
@@ -367,15 +376,24 @@ static inline Out &from_pixel_format(Out &out, const In &in, int pixel = 0) {
     In::G ? shift_bits<In::G, Out::G>(g) : In::W ? shift_bits<In::W, Out::G>(w) : shift_bits<In::A, Out::G>(a),
     In::B ? shift_bits<In::B, Out::B>(b) : In::W ? shift_bits<In::W, Out::B>(w) : shift_bits<In::A, Out::B>(a),
     In::A ? shift_bits<In::A, Out::A>(a) : shift_bits<In::W, Out::A>(w),
-    In::W ? shift_bits<In::W, Out::W>(w) : shift_bits<8, Out::W>(approx_w)
+    In::W ? shift_bits<In::W, Out::W>(w) : shift_bits<8, Out::W>(approx_w),
+    out_pixel
   );
   return out;
 }
 
 template<typename Out, typename In>
-static inline Out from_pixel_format(const In &in, int pixel = 0) {
+static inline Out from_pixel_format(const In &in, int in_pixel = 0) {
   Out out;
-  return from_pixel_format(out, in, pixel);
+  return from_pixel_format(out, 0, in, in_pixel);
+}
+
+template<typename Out>
+static inline Out &copy_pixel(Out &out, const Out &in, int start_pixel = 0, int end_pixel = Out::PIXELS) {
+  for (int i = start_pixel; i < end_pixel; i++) {
+    from_pixel_format(out, i, in, i);
+  }
+  return out;
 }
 
 } // display
