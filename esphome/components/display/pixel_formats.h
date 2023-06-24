@@ -55,7 +55,7 @@ enum class PixelFormat {
   MACRO(RGBA8888, ##__VA_ARGS__);
 
 template<int In, int Out>
-inline uint8_t shift_bits(uint8_t src) {
+inline ALWAYS_INLINE uint8_t shift_bits(uint8_t src) {
   if (!In || !Out) {
     return 0;
   } else if (In < Out) {
@@ -83,7 +83,7 @@ inline uint8_t shift_bits(uint8_t src) {
   }
 }
 
-inline uint16_t swap16(uint16_t x) {
+inline ALWAYS_INLINE uint16_t swap16(uint16_t x) {
   return (x << 8) | (x >> 8);
 }
 
@@ -99,22 +99,22 @@ struct PixelDetails {
   static const int PIXELS = PP;
   static const bool COLOR_KEY = CCOLOR_KEY;
 
-  static inline int pixel_index(int x) {
+  static inline ALWAYS_INLINE int pixel_index(int x) {
     return x % PIXELS;
   }
-  static inline int array_offset(int x) {
+  static inline ALWAYS_INLINE int array_offset(int x) {
     return x / PIXELS;
   }
-  static inline int array_stride(int width) {
+  static inline ALWAYS_INLINE int array_stride(int width) {
     return (width + PIXELS - 1) / PIXELS;
   }
-  static inline int array_stride(int width, int height) {
+  static inline ALWAYS_INLINE int array_stride(int width, int height) {
     return array_stride(width) * height;
   }
-  static inline int bytes_stride(int width) {
+  static inline ALWAYS_INLINE int bytes_stride(int width) {
     return array_stride(width) * BYTES;
   }
-  static inline int bytes_stride(int width, int height) {
+  static inline ALWAYS_INLINE int bytes_stride(int width, int height) {
     return array_stride(width, height) * BYTES;
   }
 };
@@ -122,16 +122,16 @@ struct PixelDetails {
 struct PixelRGB332 : PixelDetails<PixelFormat::RGB332, 3,3,2,0,0,1> {
   uint8_t raw_8;
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return false;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     this->raw_8 = r << (3+2) | g << (2) | b;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = this->raw_8 >> (3+2);
     g = (this->raw_8 >> (2)) & ((1<<3) - 1);
     b = (this->raw_8 >> 0) & ((1<<2) - 1);
@@ -143,17 +143,17 @@ template<PixelFormat Format, bool BigEndian>
 struct PixelRGB565_Endiness : PixelDetails<Format,5,6,5,0,0,2> {
   uint16_t raw_16;
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return false;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     uint16_t value = r << (6+5) | g << (5) | b;
     this->raw_16 = BigEndian ? swap16(value) : value;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     uint16_t value = BigEndian ? swap16(this->raw_16) : this->raw_16;
     r = value >> (6+5);
     g = (value >> (5)) & ((1<<6) - 1);
@@ -168,18 +168,18 @@ typedef PixelRGB565_Endiness<PixelFormat::RGB565_BE, true> PixelRGB565_BE;
 struct PixelRGB888 : PixelDetails<PixelFormat::RGB888,8,8,8,0,0,3> {
   uint8_t raw_8[3];
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return false;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     this->raw_8[0] = r;
     this->raw_8[1] = g;
     this->raw_8[2] = b;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = this->raw_8[0];
     g = this->raw_8[1];
     b = this->raw_8[2];
@@ -190,17 +190,17 @@ struct PixelRGB888 : PixelDetails<PixelFormat::RGB888,8,8,8,0,0,3> {
 struct PixelRGBA4444 : PixelDetails<PixelFormat::RGBA4444,4,4,4,4,0,2> {
   uint8_t raw_8[2];
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return (this->raw_8[1] & 0xF) < 0x8;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     this->raw_8[0] = r << 4 | g;
     this->raw_8[1] = b << 4 | a;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = this->raw_8[0] >> 4;
     g = this->raw_8[0] & 0xF;
     b = this->raw_8[1] >> 4;
@@ -212,19 +212,19 @@ struct PixelRGBA4444 : PixelDetails<PixelFormat::RGBA4444,4,4,4,4,0,2> {
 struct PixelRGBA8888 : PixelDetails<PixelFormat::RGBA8888,8,8,8,8,0,4> {
   uint8_t raw_8[4];
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return this->raw_8[3] < 0x80;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     this->raw_8[0] = r;
     this->raw_8[1] = g;
     this->raw_8[2] = b;
     this->raw_8[3] = a;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = this->raw_8[0];
     g = this->raw_8[1];
     b = this->raw_8[2];
@@ -236,19 +236,19 @@ struct PixelRGBA8888 : PixelDetails<PixelFormat::RGBA8888,8,8,8,8,0,4> {
 struct PixelW1 : PixelDetails<PixelFormat::W1,0,0,0,0,1,1,8,true> {
   uint8_t raw_8;
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return (this->raw_8 & (1<<(7-pixel))) ? true : false;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return false;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     const int mask = 1<<(7-pixel);
     this->raw_8 &= ~mask;
     if (w)
       this->raw_8 |= mask;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = 0; g = 0; b = 0; a = 0;
     w = (this->raw_8 & (1<<(7-pixel))) ? 1 : 0;
   }
@@ -257,19 +257,19 @@ struct PixelW1 : PixelDetails<PixelFormat::W1,0,0,0,0,1,1,8,true> {
 struct PixelA1 : PixelDetails<PixelFormat::A1,0,0,0,1,0,1,8,true> {
   uint8_t raw_8;
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return (this->raw_8 & (1<<(7-pixel))) ? true : false;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return (this->raw_8 & (1<<(7-pixel))) ? false : true;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     const int mask = 1<<(7-pixel);
     this->raw_8 &= ~mask;
     if (a)
       this->raw_8 |= mask;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = 0; g = 0; b = 0; w = 0;
     a = (this->raw_8 & (1<<(7-pixel))) ? 1 : 0;
   }
@@ -278,17 +278,17 @@ struct PixelA1 : PixelDetails<PixelFormat::A1,0,0,0,1,0,1,8,true> {
 struct PixelW2 : PixelDetails<PixelFormat::W2,0,0,0,0,2,1,4> {
   uint8_t raw_8;
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return false;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     this->raw_8 &= ~(3 << (pixel*2));
     this->raw_8 |= w << (pixel*2);
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = 0; g = 0; b = 0; a = 0;
     w = (this->raw_8 >> (pixel*2)) & 0x3;
   }
@@ -297,13 +297,13 @@ struct PixelW2 : PixelDetails<PixelFormat::W2,0,0,0,0,2,1,4> {
 struct PixelW4 : PixelDetails<PixelFormat::W4,0,0,0,0,4,1,2> {
   uint8_t raw_8;
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return false;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     if (pixel) {
       this->raw_8 &= ~0xF0;
       this->raw_8 |= w << 4;
@@ -312,7 +312,7 @@ struct PixelW4 : PixelDetails<PixelFormat::W4,0,0,0,0,4,1,2> {
       this->raw_8 |= w;
     }
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = 0; g = 0; b = 0; a = 0;
     if (pixel)
       w = this->raw_8 >> 4;
@@ -325,16 +325,16 @@ template<PixelFormat Format, bool Key>
 struct PixelW8_Keyed : PixelDetails<Format,0,0,0,0,8,1> {
   uint8_t raw_8;
 
-  inline bool is_on(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_on(int pixel = 0) const {
     return true;
   }
-  inline bool is_transparent(int pixel = 0) const {
+  inline ALWAYS_INLINE bool is_transparent(int pixel = 0) const {
     return Key ? this->raw_8 == 1 : false;
   }
-  inline void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
+  inline ALWAYS_INLINE void encode(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t w, int pixel = 0) {
     this->raw_8 = w;
   }
-  inline void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
+  inline ALWAYS_INLINE void decode(uint8_t &r, uint8_t &g, uint8_t &b, uint8_t &a, uint8_t &w, int pixel = 0) const {
     r = 0; g = 0; b = 0; a = 0;
     w = this->raw_8;
   }
@@ -344,7 +344,7 @@ typedef PixelW8_Keyed<PixelFormat::W8, false> PixelW8;
 typedef PixelW8_Keyed<PixelFormat::W8_KEY, true> PixelW8_KEY;
 
 template<typename Out>
-static inline Out from_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 0xFF) {
+static inline ALWAYS_INLINE Out from_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 0xFF) {
   Out out;
   const uint8_t approx_w = (r >> 2) + (g >> 1) + (b >> 2);
   out.encode(
@@ -358,7 +358,7 @@ static inline Out from_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 0xFF) {
 }
 
 template<typename Out>
-static inline Out from_w(uint8_t w, uint8_t a = 0xFF) {
+static inline ALWAYS_INLINE Out from_w(uint8_t w, uint8_t a = 0xFF) {
   Out out;
   out.encode(
     shift_bits<8, Out::R>(w),
@@ -371,7 +371,7 @@ static inline Out from_w(uint8_t w, uint8_t a = 0xFF) {
 }
 
 template<typename Out>
-static inline Out from_color(Out &out, const Color &in, int out_pixel = 0) {
+static inline ALWAYS_INLINE Out from_color(Out &out, const Color &in, int out_pixel = 0) {
   const uint8_t approx_w = (in.r >> 2) + (in.g >> 1) + (in.b >> 2);
   out.encode(
     shift_bits<8, Out::R>(in.r),
@@ -385,7 +385,7 @@ static inline Out from_color(Out &out, const Color &in, int out_pixel = 0) {
 }
 
 template<typename Out>
-static inline Out from_color(const Color &in, bool expand = true) {
+static inline ALWAYS_INLINE Out from_color(const Color &in, bool expand = true) {
   Out out;
   from_color(out, in);
   if (expand) {
@@ -397,7 +397,7 @@ static inline Out from_color(const Color &in, bool expand = true) {
 }
 
 template<typename In>
-static inline Color to_color(const In &in, int pixel = 0) {
+static inline ALWAYS_INLINE Color to_color(const In &in, int pixel = 0) {
   uint8_t r, g, b, a, w;
   in.decode(r, g, b, a, w, pixel);
 
@@ -410,22 +410,22 @@ static inline Color to_color(const In &in, int pixel = 0) {
 }
 
 template<typename Out>
-static inline Out *offset_buffer(Out *buffer, int x, int y, int width) {
+static inline ALWAYS_INLINE Out *offset_buffer(Out *buffer, int x, int y, int width) {
   return &buffer[y * Out::array_stride(width) + Out::array_offset(x)];
 }
 
 template<typename Out>
-static inline Out *offset_buffer(Out *buffer, int x) {
+static inline ALWAYS_INLINE Out *offset_buffer(Out *buffer, int x) {
   return &buffer[Out::array_offset(x)];
 }
 
 template<typename Out>
-static inline Out *offset_end_buffer(Out *buffer, int x) {
+static inline ALWAYS_INLINE Out *offset_end_buffer(Out *buffer, int x) {
   return &buffer[Out::array_stride(x)];
 }
 
 template<typename Out, typename In>
-static inline Out &from_pixel_format(Out &out, int out_pixel, const In &in, int in_pixel = 0) {
+static inline ALWAYS_INLINE Out &from_pixel_format(Out &out, int out_pixel, const In &in, int in_pixel = 0) {
   uint8_t r, g, b, a, w;
   in.decode(r, g, b, a, w, in_pixel);
 
@@ -443,13 +443,13 @@ static inline Out &from_pixel_format(Out &out, int out_pixel, const In &in, int 
 }
 
 template<typename Out, typename In>
-static inline Out from_pixel_format(const In &in, int in_pixel = 0) {
+static inline ALWAYS_INLINE Out from_pixel_format(const In &in, int in_pixel = 0) {
   Out out;
   return from_pixel_format(out, 0, in, in_pixel);
 }
 
 template<typename Out>
-static inline Out &copy_pixel(Out &out, const Out &in, int start_pixel = 0, int end_pixel = Out::PIXELS) {
+static inline ALWAYS_INLINE Out &copy_pixel(Out &out, const Out &in, int start_pixel = 0, int end_pixel = Out::PIXELS) {
   for (int i = start_pixel; i < end_pixel; i++) {
     from_pixel_format(out, i, in, i);
   }

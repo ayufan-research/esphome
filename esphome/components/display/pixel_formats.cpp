@@ -6,7 +6,7 @@ namespace esphome {
 namespace display {
 
 template<typename PixelFormat>
-inline void bitblt_copy(
+inline ALWAYS_INLINE void bitblt_copy(
   PixelFormat *dest_p, const PixelFormat *src_p, int x, int width)
 {
   auto dest_end_p = offset_end_buffer(dest_p, x + width);
@@ -33,7 +33,7 @@ inline void bitblt_copy(
 }
 
 template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
-inline void bitblt_fast(
+inline ALWAYS_INLINE void bitblt_fast(
   DestPixelFormat *dest_p, const SrcPixelFormat *src_p, int width,
   DestPixelFormat color_on, DestPixelFormat color_off)
 {
@@ -56,7 +56,7 @@ inline void bitblt_fast(
 }
 
 template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
-inline void bitblt_semi_fast_src_pixels(
+inline ALWAYS_INLINE void bitblt_semi_fast_src_pixels(
   DestPixelFormat *dest_p, const SrcPixelFormat *src_p, int src_pixel, int width,
   DestPixelFormat color_on, DestPixelFormat color_off)
 {
@@ -81,7 +81,7 @@ inline void bitblt_semi_fast_src_pixels(
 }
 
 template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
-inline void bitblt_semi_fast_dest_pixels(
+inline ALWAYS_INLINE void bitblt_semi_fast_dest_pixels(
   DestPixelFormat *dest_p, int dest_pixel, const SrcPixelFormat *src_p, int width,
   DestPixelFormat color_on, DestPixelFormat color_off)
 {
@@ -106,7 +106,7 @@ inline void bitblt_semi_fast_dest_pixels(
 }
 
 template<bool Transparency, typename SrcPixelFormat, typename DestPixelFormat>
-inline void bitblt_slow_src_dest_pixels(
+inline ALWAYS_INLINE void bitblt_slow_src_dest_pixels(
   DestPixelFormat *dest_p, int dest_pixel, const SrcPixelFormat *src_p, int src_pixel, int width,
   DestPixelFormat color_on, DestPixelFormat color_off)
 {
