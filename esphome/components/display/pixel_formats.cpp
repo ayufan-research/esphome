@@ -6,7 +6,7 @@ namespace esphome {
 namespace display {
 
 template<typename SrcPixelFormat, typename DestPixelFormat, bool Transparency>
-void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int width, DestPixelFormat color_on, DestPixelFormat color_off)
+void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int src_x, int width, DestPixelFormat color_on, DestPixelFormat color_off)
 {
   auto p = offset_buffer(dest, dest_x);
   auto endp = offset_end_buffer(dest, dest_x + width);
@@ -68,7 +68,7 @@ void fill(PixelFormat *dest, int x, int width, const PixelFormat &color)
 #define EXPORT_SRC_DEST_BITBLT(src_format, dest_format, ...) \
   template void bitblt<Pixel##src_format, Pixel##dest_format, ##__VA_ARGS__>( \
     Pixel##dest_format *dest, int dest_x, \
-    const Pixel##src_format *src, int width, \
+    const Pixel##src_format *src, int src_x, int width, \
     Pixel##dest_format color_on, Pixel##dest_format color_off)
 
 #define EXPORT_DEST_BITBLT(src_format, dest_format) \
