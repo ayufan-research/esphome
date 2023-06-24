@@ -64,5 +64,26 @@ void fill(PixelFormat *dest, int x, int width, const PixelFormat &color)
     *p = color;
 }
 
+#define EXPORT_IGNORE(...)
+#define EXPORT_SRC_DEST_BITBLT(src_format, dest_format, ...) \
+  template void bitblt<Pixel##src_format, Pixel##dest_format, ##__VA_ARGS__>( \
+    Pixel##dest_format *dest, int dest_x, \
+    const Pixel##src_format *src, int width, \
+    Pixel##dest_format color_on, Pixel##dest_format color_off)
+
+#define EXPORT_DEST_BITBLT(src_format, dest_format) \
+  EXPORT_SRC_DEST_BITBLT(src_format, dest_format, false); \
+  EXPORT_SRC_DEST_BITBLT(src_format, dest_format, true)
+
+#define EXPORT_FILL(dest_format) \
+  template void fill( \
+    Pixel##dest_format *dest, int x, int width, \
+    const Pixel##dest_format &color)
+
+#define EXPORT_BITBLT(dest_format) EXPORT_SRC_PIXEL_FORMAT(EXPORT_DEST_BITBLT, EXPORT_IGNORE, dest_format)
+
+EXPORT_DEST_PIXEL_FORMAT(EXPORT_BITBLT, EXPORT_IGNORE);
+EXPORT_DEST_PIXEL_FORMAT(EXPORT_FILL, EXPORT_IGNORE);
+
 }  // namespace display
 }  // namespace esphome
