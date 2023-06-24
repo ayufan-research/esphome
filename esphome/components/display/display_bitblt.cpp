@@ -24,10 +24,21 @@ static bool display_direct_draw(int x, int y, int width, int height,
       return false;
   }
 
-  return draw_pixels(
+  auto start_us = micros();
+
+  bool done = draw_pixels(
     x, y, width, height,
     (const uint8_t*)src, src_stride, src_stride
   );
+
+  if (done) {
+    ESP_LOGI(TAG, "Direct Draw: %dx%d/%dx%d, src_x=%d, stride=%d, format=%d, time_us=%d",
+      x, y, width, height,
+      src_x, src_stride, PixelFormat::FORMAT,
+      micros() - start_us);
+  }
+
+  return done;
 }
 
 template<typename DestPixelFormat, typename SrcPixelFormat, typename Fn>
@@ -37,6 +48,7 @@ static bool display_convert_draw(
   Color color_on, Color color_off, Fn draw_pixels
 ) {
   auto width_stride = DestPixelFormat::stride(DestPixelFormat::offset(x) + width);
+  auto width_bytes_stride = DestPixelFormat::bytes_stride(DestPixelFormat::offset(x) + width);
   auto dest = new DestPixelFormat[width_stride];
   bool done = true;
   DestPixelFormat dest_on, dest_off;
@@ -45,6 +57,8 @@ static bool display_convert_draw(
     dest_on = from_color<DestPixelFormat>(color_on);
     dest_off = from_color<DestPixelFormat>(color_off);
   }
+
+  auto start_us = micros();
 
   for (int j = 0; j < height && done; j++) {
     bitblt<SrcPixelFormat, DestPixelFormat, false>(
@@ -56,8 +70,17 @@ static bool display_convert_draw(
 
     done = draw_pixels(
       x, y + j, width, 1,
-      (const uint8_t*)dest, width_stride, width_stride
+      (const uint8_t*)dest, width_bytes_stride, width_bytes_stride
     );
+  }
+
+  if (done) {
+    ESP_LOGI(TAG, "%s Draw: %dx%d/%dx%d, src_x=%d, stride=%d, src_format=%d, dest_format=%d, time_us=%d",
+      SrcPixelFormat::COLOR_KEY ? "Keyed" : "Convert",
+      x, y, width, height,
+      src_x, src_stride,
+      SrcPixelFormat::FORMAT, DestPixelFormat::FORMAT,
+      micros() - start_us);
   }
 
   delete [] dest;
@@ -77,6 +100,8 @@ static bool display_convert_buffer(
     dest_off = from_color<DestPixelFormat>(color_off);
   }
 
+  auto start_us = micros();
+
   for (int j = 0; j < height; j++) {
     auto dest = (DestPixelFormat*)get_pixels(y + j);
     if (!dest)
@@ -88,6 +113,13 @@ static bool display_convert_buffer(
       dest_on, dest_off);
     src = (const SrcPixelFormat*)((const uint8_t*)src + src_stride);
   }
+
+  ESP_LOGI(TAG, "%s Blt: %dx%d/%dx%d, src_x=%d, stride=%d, src_format=%d, dest_format=%d, time_us=%d",
+    SrcPixelFormat::COLOR_KEY ? "Keyed" : "Convert",
+    x, y, width, height,
+    src_x, src_stride,
+    SrcPixelFormat::FORMAT, DestPixelFormat::FORMAT,
+    micros() - start_us);
 
   return true;
 }
