@@ -134,6 +134,12 @@ bool HOT GC9A01::draw_pixels_(int x, int y, int w, int h, const uint8_t *data, i
   uint16_t y1 = this->rowstart_ + y;
   uint16_t y2 = y1 + h - 1;
 
+#if 0
+  ESP_LOGI(TAG, "GC9A01 Draw Pixels: %dx%d/%dx%d, line_size=%d, stride=%d",
+    x, y, w, h,
+    data_line_size, data_stride);
+#endif
+
   this->enable();
 
   // set column(x) address
