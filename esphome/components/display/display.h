@@ -484,7 +484,7 @@ class Display {
   bool clamp_y(int y, int h, int &min_y, int &max_y);
 
   virtual PixelFormat get_native_pixel_format() = 0;
-  bool draw_pixels_at(int x, int y, int w, int h, const uint8_t *data, int data_length, PixelFormat data_format, Color color_on = COLOR_ON, Color color_off = COLOR_OFF);
+  bool draw_pixels_at(int x, int y, int w, int h, const uint8_t *data, int stride, PixelFormat data_format, Color color_on = COLOR_ON, Color color_off = COLOR_OFF);
 
  protected:
   virtual uint8_t *get_native_pixels_(int y) { return nullptr; }
