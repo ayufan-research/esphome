@@ -128,16 +128,11 @@ void HOT GC9A01::draw_pixel_at(int x, int y, Color color) {
   this->draw_pixels_(x, y, 1, 1, data, sizeof(data), sizeof(data), 0);
 }
 
-bool HOT GC9A01::draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_line_size, int data_stride, int pixel_offset) {
+bool HOT GC9A01::draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_line_size, int data_stride) {
   uint16_t x1 = this->colstart_ + x;
   uint16_t x2 = x1 + w - 1;
   uint16_t y1 = this->rowstart_ + y;
   uint16_t y2 = y1 + h - 1;
-
-  // Since this is non-packed format the pixel_offset is not supported
-  assert(pixel_offset == 0);
-
-  // TODO: handle pixel offset
 
   this->enable();
 

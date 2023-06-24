@@ -28,7 +28,7 @@ class GC9A01 : public PollingComponent,
   int get_height() override { return this->height_; }
 
   display::PixelFormat get_native_pixel_format() override { return display::PixelFormat::RGB565_BE; }
-  bool draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_line_size, int data_stride, int pixel_offset) override;
+  bool draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_line_size, int data_stride) override;
   void draw_pixel_at(int x, int y, Color color) override;
 
  public:
