@@ -125,7 +125,7 @@ void HOT GC9A01::draw_pixel_at(int x, int y, Color color) {
     uint8_t(color565)
   };
 
-  this->draw_pixels_(x, y, 1, 1, data, sizeof(data), sizeof(data), 0);
+  this->draw_pixels_(x, y, 1, 1, data, sizeof(data), sizeof(data));
 }
 
 bool HOT GC9A01::draw_pixels_(int x, int y, int w, int h, const uint8_t *data, int data_line_size, int data_stride) {
