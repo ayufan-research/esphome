@@ -370,6 +370,11 @@ static inline Out *offset_buffer(Out *buffer, int x) {
   return &buffer[Out::offset(x)];
 }
 
+template<typename Out>
+static inline Out *offset_end_buffer(Out *buffer, int x) {
+  return &buffer[Out::stride(x)];
+}
+
 template<typename Out, typename In>
 static inline Out &from_pixel_format(Out &out, int out_pixel, const In &in, int in_pixel = 0) {
   uint8_t r, g, b, a, w;
@@ -401,6 +406,12 @@ static inline Out &copy_pixel(Out &out, const Out &in, int start_pixel = 0, int 
   }
   return out;
 }
+
+template<typename SrcPixelFormat, typename DestPixelFormat>
+void bitblt(DestPixelFormat *dest, int dest_x, const SrcPixelFormat *src, int src_x, int width);
+
+template<typename PixelFormat>
+void fill(PixelFormat *dest, int x, int width, const PixelFormat &color);
 
 } // display
 } // esphome
