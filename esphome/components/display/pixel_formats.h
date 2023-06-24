@@ -360,12 +360,14 @@ static inline Out &from_pixel_format(Out &out, const In &in, int pixel = 0) {
   uint8_t r, g, b, a, w;
   in.decode(r, g, b, a, w, pixel);
 
+  uint8_t approx_w = shift_bits<In::R, 6>(r) + shift_bits<In::G, 7>(g) + shift_bits<In::B, 6>(b);
+
   out.encode(
     In::R ? shift_bits<In::R, Out::R>(r) : In::W ? shift_bits<In::W, Out::R>(w) : shift_bits<In::A, Out::R>(a),
     In::G ? shift_bits<In::G, Out::G>(g) : In::W ? shift_bits<In::W, Out::G>(w) : shift_bits<In::A, Out::G>(a),
     In::B ? shift_bits<In::B, Out::B>(b) : In::W ? shift_bits<In::W, Out::B>(w) : shift_bits<In::A, Out::B>(a),
     In::A ? shift_bits<In::A, Out::A>(a) : shift_bits<In::W, Out::A>(w),
-    shift_bits<In::W, Out::W>(w)
+    In::W ? shift_bits<In::W, Out::W>(w) : shift_bits<8, Out::W>(approx_w)
   );
   return out;
 }
