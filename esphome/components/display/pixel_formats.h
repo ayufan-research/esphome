@@ -67,22 +67,6 @@ inline ALWAYS_INLINE uint8_t shift_bits(uint8_t src) {
     out |= src & 0x02 ? 0xAA : 0;
     out |= src & 0x01 ? 0x55 : 0;
     return out >> (8 - Out);
-  } else if (In == 3 && In < Out) {
-    // expand: fast expand
-    uint8_t out = 0;
-    // 1, 2, 4, 8, 10, 20, 40, 80
-    out |= src & 0x04 ? (0x2 + 0x10 + 0x80) : 0;
-    out |= src & 0x02 ? (0x1 + 0x08 + 0x40) : 0;
-    out |= src & 0x01 ? (0x0 + 0x4 + 0x20) : 0;
-    return out >> (8 - Out);
-  } else if (In == 4 && In < Out) {
-    return ((src << 4) + (src)) >> (8 - Out);
-  } else if (In == 5 && In < Out) {
-    return ((src << 3) + (src >> 2)) >> (8 - Out);
-  } else if (In == 6 && In < Out) {
-    return ((src << 2) + (src >> 4)) >> (8 - Out);
-  } else if (In == 7 && In < Out) {
-    return ((src << 1) + (src >> 6)) >> (8 - Out);
   } else if (In < Out) {
     // expand: In=5 => Out=8
     // src << (8-5) + src >> (5 - (8-5))
